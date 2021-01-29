@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
+import EditMenu from './EditMenu'
+import { useParams } from "react-router-dom";
+import {axiosWithAuth} from '../utils/axiosWithAuth'
 
 const initialColor = {
   color: "",
@@ -17,11 +20,36 @@ const ColorList = ({ colors, updateColors }) => {
 
   const saveEdit = e => {
     e.preventDefault();
+    console.log(colorToEdit)
+    axiosWithAuth()
+    .put(`http://localhost:5000/api/colors/${colorToEdit.id}`, colorToEdit)
+    .then(res=> {
+        console.log(colorToEdit)
+        console.log(res.data)
 
-  };
+        updateColors(
+          colors.map((color) => {
+            if (color.id === res.data.id) {
+              return res.data;
+            } else {
+              return color;
+            }
+          })
+          )
+        })
+    .catch(err => {
+        console.log(err)
+    })
+  }
 
   const deleteColor = color => {
-  };
+      axiosWithAuth()
+        .delete(`http://localhost:5000/api/movies/${colorToEdit.id}`)
+        .then((res) => {
+          updateColors(colors.filter((color) => color.id !== res.data));
+        })
+        .catch((err) => console.log(err));
+    };
 
   return (
     <div className="colors-wrap">
@@ -32,6 +60,7 @@ const ColorList = ({ colors, updateColors }) => {
             <span>
               <span className="delete" onClick={e => {
                     e.stopPropagation();
+                    e.preventDefault()
                     deleteColor(color)
                   }
                 }>
@@ -50,7 +79,7 @@ const ColorList = ({ colors, updateColors }) => {
 
     </div>
   );
-};
+              };
 
 export default ColorList;
 
